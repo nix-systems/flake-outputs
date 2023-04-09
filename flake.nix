@@ -19,11 +19,23 @@
               echo WIP
             }
 
+            # TODO: Don't hardcode system
+            let system = "aarch64-darwin"
+            let systemInput = $"github:nix-systems/($system)"
+
             # NOTE: "args" cannot accept flags (like -L), unfortunately
             # See https://github.com/nushell/nushell/issues/7758
             def "main flake check" [...args] {
-              # TODO: Don't hardcode system
-              nix flake check --allow-import-from-derivation --override-input systems github:nix-systems/aarch64-darwin $args
+              nix flake check --allow-import-from-derivation --override-input systems $systemInput $args
+            }
+
+            def "main build-all" [flake] {
+              nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
+                from json | get $"packages" | get $system | 
+                columns | each { |pkg| 
+                  echo $"+ nix build ($flake)#($pkg)"
+                  nix build $"($flake)#($pkg)" 
+                }
             }
           '';
         };
