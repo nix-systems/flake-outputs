@@ -28,7 +28,6 @@
               nix flake check --allow-import-from-derivation --override-input systems $systemInput $args
             }
 
-            # TODO: Handle failures; these are ignored!
             def "main build-all" [
               flake: string = "."  # The flake to build
               --no-checks  # Don't build checks
@@ -38,6 +37,12 @@
               def nixBuild [pkg: string] {
                   echo $"+ nix build ($flake)#($pkg)"
                   nix build $"($flake)#($pkg)" 
+                  # TODO: Can we report errors better? ie., let other packages
+                  # build, and summarize failuresd at end.
+                  if $env.LAST_EXIT_CODE != 0 {
+                    echo "nix-build failed; aborting."
+                    exit 2
+                  };
               }
 
               let packages = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
