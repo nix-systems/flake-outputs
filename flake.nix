@@ -46,7 +46,7 @@
                     nix build $"($flake)#($pkg)" 
                     []
                   } catch {
-                    [pkg]
+                    [$pkg]
                   }
               }
 
