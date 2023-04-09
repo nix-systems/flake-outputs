@@ -34,6 +34,8 @@
               --no-devShells  # Don't build devShells
               ] {
 
+              let metadata = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | from json)
+
               def nixBuild [pkg: string] {
                   echo $"+ nix build ($flake)#($pkg)"
                   nix build $"($flake)#($pkg)" 
@@ -45,29 +47,20 @@
                   };
               }
 
-              let packages = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
-                from json | get $"packages" | get $system | columns)
+              let packages = ($metadata | get $"packages" | get $system | columns)
               echo $"Flake outputs these packages: ($packages)"
-              $packages | each { |pkg| 
-                  nixBuild $"($pkg)"
-                }
+              $packages | each { |pkg| nixBuild $"($pkg)" }
 
               if (not $no_checks) {
-                let checks = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
-                  from json | get $"checks" | get $system | columns)
+                let checks = ($metadata | get $"checks" | get $system | columns)
                 echo $"Flake outputs these checks: ($checks)"
-                $checks | each { |pkg| 
-                    nixBuild $"checks.($system).($pkg)"
-                  }               
+                $checks | each { |pkg| nixBuild $"checks.($system).($pkg)" }               
               }
 
               if (not $no_devShells) {
-                let devShells = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
-                  from json | get $"devShells" | get $system | columns)
+                let devShells = ($metadata | get $"devShells" | get $system | columns)
                 echo $"Flake outputs these devShells: ($devShells)"
-                $devShells | each { |pkg| 
-                    nixBuild $"devShells.($system).($pkg)"
-                  }               
+                $devShells | each { |pkg| nixBuild $"devShells.($system).($pkg)" }               
               }
             }
           '';
