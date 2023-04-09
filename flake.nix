@@ -36,32 +36,41 @@
 
               let metadata = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | from json)
 
+              # Handle nix build failures in one place, for reporting latter.
+              # TODO: This is more of a hack; can it be done better?
+              let failedPackages = [ ]
+
               def nixBuild [pkg: string] {
                   echo $"+ nix build ($flake)#($pkg)"
                   try {
                     nix build $"($flake)#($pkg)" 
+                    []
                   } catch {
-                    # TODO: Can we report errors better? ie., let other packages
-                    # build, and summarize failuresd at end.
-                    echo "nix-build failed; aborting."
-                    exit 2
+                    [pkg]
                   }
               }
 
               let packages = ($metadata | get $"packages" | get $system | columns)
               echo $"Flake outputs these packages: ($packages)"
-              $packages | each { |pkg| nixBuild $"($pkg)" }
+              let failedPackages = ($failedPackages ++ $packages | each { |pkg| nixBuild $"($pkg)" } | flatten)
 
-              if (not $no_checks) {
+              let failedPackages = ($failedPackages ++ (if (not $no_checks) {
                 let checks = ($metadata | get $"checks" | get $system | columns)
                 echo $"Flake outputs these checks: ($checks)"
-                $checks | each { |pkg| nixBuild $"checks.($system).($pkg)" }               
-              }
+                $checks | each { |pkg| nixBuild $"checks.($system).($pkg)" } | flatten
+              } else { [] }))
 
-              if (not $no_devShells) {
+              let failedPackages = ($failedPackages ++ (if (not $no_devShells) {
                 let devShells = ($metadata | get $"devShells" | get $system | columns)
                 echo $"Flake outputs these devShells: ($devShells)"
-                $devShells | each { |pkg| nixBuild $"devShells.($system).($pkg)" }               
+                $devShells | each { |pkg| nixBuild $"devShells.($system).($pkg)" } | flatten
+              } else { [] }))
+
+              if (($failedPackages | length) == 0) {
+                echo "No failures"
+              } else {
+                echo $"Failed to build: ($failedPackages)"
+                exit 2
               }
             }
           '';
