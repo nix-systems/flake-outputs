@@ -5,5 +5,5 @@ WIP: Useful Nix workflows for CI
 
 ```sh
 # Build all packages, checks and devShells
-nix run . -- build-all github:srid/haskell-template
+nix run github:srid/nix-ci build-all github:srid/haskell-template
 ```
