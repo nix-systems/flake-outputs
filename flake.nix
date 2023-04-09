@@ -41,7 +41,7 @@
                     $metadata | get devShells | get $system | columns |
                       each { |pkg| $"devShells.($system).($pkg)" } 
                   )
-              $packages ++ $checks ++ $devShells
+              $packages ++ $checks ++ $devShells | str join "\n"
             }
           '';
         };
