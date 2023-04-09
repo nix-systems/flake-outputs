@@ -38,13 +38,14 @@
 
               def nixBuild [pkg: string] {
                   echo $"+ nix build ($flake)#($pkg)"
-                  nix build $"($flake)#($pkg)" 
-                  # TODO: Can we report errors better? ie., let other packages
-                  # build, and summarize failuresd at end.
-                  if $env.LAST_EXIT_CODE != 0 {
+                  try {
+                    nix build $"($flake)#($pkg)" 
+                  } catch {
+                    # TODO: Can we report errors better? ie., let other packages
+                    # build, and summarize failuresd at end.
                     echo "nix-build failed; aborting."
                     exit 2
-                  };
+                  }
               }
 
               let packages = ($metadata | get $"packages" | get $system | columns)
