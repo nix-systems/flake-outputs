@@ -3,14 +3,7 @@ WIP: Useful Nix workflows for CI
 
 ## Usage
 
-Examples,
-
 ```sh
-nix run . -- flake check github:srid/haskell-template
-```
-
-## Development
-
-```sh
-nix run nixpkgs#watchexec -- -e nix nix run
+# Build all packages, checks and devShells
+nix run . -- build-all github:srid/haskell-template
 ```
