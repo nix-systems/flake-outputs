@@ -28,7 +28,7 @@
               nix flake check --allow-import-from-derivation --override-input systems $systemInput $args
             }
 
-            def "main build-all" [flake] {
+            def "main build-all" [flake: string = "."] {
               nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
                 from json | get $"packages" | get $system | 
                 columns | each { |pkg| 
