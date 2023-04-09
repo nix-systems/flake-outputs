@@ -28,18 +28,23 @@
               nix flake check --allow-import-from-derivation --override-input systems $systemInput $args
             }
 
+            # TODO: Handle failures; these are ignored!
             def "main build-all" [
               flake: string = "."  # The flake to build
               --no-checks  # Don't build checks
               --no-devShells  # Don't build devShells
               ] {
 
+              def nixBuild [pkg: string] {
+                  echo $"+ nix build ($flake)#($pkg)"
+                  nix build $"($flake)#($pkg)" 
+              }
+
               let packages = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
                 from json | get $"packages" | get $system | columns)
               echo $"Flake outputs these packages: ($packages)"
               $packages | each { |pkg| 
-                  echo $"+ nix build ($flake)#($pkg)"
-                  nix build $"($flake)#($pkg)" 
+                  nixBuild $"($pkg)"
                 }
 
               if (not $no_checks) {
@@ -47,8 +52,7 @@
                   from json | get $"checks" | get $system | columns)
                 echo $"Flake outputs these checks: ($checks)"
                 $checks | each { |pkg| 
-                    echo $"+ nix build ($flake)#checks.($system).($pkg)"
-                    nix build $"($flake)#checks.($system).($pkg)" 
+                    nixBuild $"checks.($system).($pkg)"
                   }               
               }
 
@@ -57,8 +61,7 @@
                   from json | get $"devShells" | get $system | columns)
                 echo $"Flake outputs these devShells: ($devShells)"
                 $devShells | each { |pkg| 
-                    echo $"+ nix build ($flake)#devShells.($system).($pkg)"
-                    nix build $"($flake)#devShells.($system).($pkg)" 
+                    nixBuild $"devShells.($system).($pkg)"
                   }               
               }
             }
