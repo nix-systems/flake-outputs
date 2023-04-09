@@ -16,6 +16,8 @@ do
 done
 ```
 
-## Background
+## Rationale
 
-This is useful in CI to automate building of all outputs, regardless of IFD or use of multi-systems.
+This is useful in CI[^eg] to automate building of all outputs, regardless of IFD or use of multi-systems.
+
+[^eg]: Jenkins, for example: https://github.com/juspay/jenkins-nix-ci/issues/12
