@@ -1,5 +1,5 @@
 # nix-ci
-WIP: Useful Nix workflows for CI
+WIP: Useful Nix CI workflows for projects that use [nix-systems](https://github.com/nix-systems/nix-systems).
 
 ## Usage
 
