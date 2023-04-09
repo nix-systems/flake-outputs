@@ -22,19 +22,45 @@
             let system = $"($nu.os-info.arch)-($nu.os-info.name | str replace macos darwin)"
             let systemInput = $"github:nix-systems/($system)"
 
-            # NOTE: "args" cannot accept flags (like -L), unfortunately
-            # See https://github.com/nushell/nushell/issues/7758
             def "main flake check" [...args] {
+              # NOTE: "args" cannot accept flags (like -L), unfortunately
+              # See https://github.com/nushell/nushell/issues/7758
               nix flake check --allow-import-from-derivation --override-input systems $systemInput $args
             }
 
-            def "main build-all" [flake: string = "."] {
-              nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
-                from json | get $"packages" | get $system | 
-                columns | each { |pkg| 
+            def "main build-all" [
+              flake: string = "."  # The flake to build
+              --no_checks  # Don't build checks
+              --no_devShells  # Don't build devShells
+              ] {
+
+              let packages = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
+                from json | get $"packages" | get $system | columns)
+              echo $"Flake outputs these packages: ($packages)"
+              $packages | each { |pkg| 
                   echo $"+ nix build ($flake)#($pkg)"
                   nix build $"($flake)#($pkg)" 
                 }
+
+              if (not $no_checks) {
+                let checks = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
+                  from json | get $"checks" | get $system | columns)
+                echo $"Flake outputs these checks: ($checks)"
+                $checks | each { |pkg| 
+                    echo $"+ nix build ($flake)#checks.($system).($pkg)"
+                    nix build $"($flake)#checks.($system).($pkg)" 
+                  }               
+              }
+
+              if (not $no_devShells) {
+                let devShells = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
+                  from json | get $"devShells" | get $system | columns)
+                echo $"Flake outputs these devShells: ($devShells)"
+                $devShells | each { |pkg| 
+                    echo $"+ nix build ($flake)#devShells.($system).($pkg)"
+                    nix build $"($flake)#devShells.($system).($pkg)" 
+                  }               
+              }
             }
           '';
         };
