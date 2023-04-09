@@ -30,8 +30,8 @@
 
             def "main build-all" [
               flake: string = "."  # The flake to build
-              --no_checks  # Don't build checks
-              --no_devShells  # Don't build devShells
+              --no-checks  # Don't build checks
+              --no-devShells  # Don't build devShells
               ] {
 
               let packages = (nix flake show --json --allow-import-from-derivation --override-input systems $systemInput $flake | 
