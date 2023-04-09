@@ -4,6 +4,11 @@ WIP: Useful Nix CI workflows for projects that use [nix-systems](https://github.
 ## Usage
 
 ```sh
-# Build all packages, checks and devShells
-nix run github:srid/nix-ci build-all github:srid/haskell-template
+# Get all buildable flake outputs
+OUTS=$(nix run github:srid/nix-ci flake drv-outputs github:srid/haskell-template)
+
+# Build them
+for OUT in $OUTS; do
+  nix build $OUT 
+done
 ```
