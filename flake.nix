@@ -13,21 +13,14 @@
           overlays = [ inputs.nuenv.overlays.nuenv ];
         };
         packages.default = pkgs.nuenv.mkScript {
-          name = "nix-ci";
+          name = "flake-outputs";
           script = ''
-            def main [] {
-              echo WIP
-            }
-
             let system = $"($nu.os-info.arch)-($nu.os-info.name | str replace macos darwin)"
             let systemInput = $"github:nix-systems/($system)"
 
-            # Return all flake outputs that are buildable derivations
-            #
-            # Filter out only current systems (assumes use of github:nix-systems)
-            def "main flake drv-outputs" [
-              flake: string = "."  # The flake to build
-              ] {
+            def flake-outputs [flake: string] {
+              # TODO: Error out on 
+              # warning: the flag '--override-input systems github:nix-systems/aarch64-darwin' does not match any input
               let metadata = (
                     nix flake show --json --allow-import-from-derivation
                       --override-input systems $systemInput $flake | from json
@@ -41,7 +34,17 @@
                     $metadata | get devShells | get $system | columns |
                       each { |pkg| $"devShells.($system).($pkg)" } 
                   )
-              $packages ++ $checks ++ $devShells | str join "\n"
+              $packages ++ $checks ++ $devShells
+            }
+
+
+            # Return all flake outputs that are buildable derivations
+            #
+            # Filter out only current systems (assumes use of github:nix-systems)
+            def main [
+              flake: string = "."  # The flake to build
+              ] {
+              flake-outputs $flake | str join "\n"
             }
           '';
         };

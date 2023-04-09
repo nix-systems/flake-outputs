@@ -1,14 +1,21 @@
-# nix-ci
-WIP: Useful Nix CI workflows for projects that use [nix-systems](https://github.com/nix-systems/nix-systems).
+# flake-outputs
+Get buildable outputs of a flake, for projects that use [nix-systems](https://github.com/nix-systems/nix-systems).
 
 ## Usage
 
 ```sh
 # Get all buildable flake outputs
-OUTS=$(nix run github:srid/nix-ci flake drv-outputs github:srid/haskell-template)
+OUTS=$(nix run github:srid/flake-outputs github:srid/haskell-template)
 
-# Build them
-for OUT in $OUTS; do
-  nix build $OUT 
+for OUT in $OUTS
+do
+  # Build them
+  nix build .#"$OUT"
+  # Push to cachix
+  nix build .#"$OUT" | cachix push mycache
 done
 ```
+
+## Background
+
+This is useful in CI to automate building of all outputs, regardless of IFD or use of multi-systems.
