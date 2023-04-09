@@ -19,8 +19,7 @@
               echo WIP
             }
 
-            # TODO: Don't hardcode system
-            let system = "aarch64-darwin"
+            let system = $"($nu.os-info.arch)-($nu.os-info.name | str replace macos darwin)"
             let systemInput = $"github:nix-systems/($system)"
 
             # NOTE: "args" cannot accept flags (like -L), unfortunately
