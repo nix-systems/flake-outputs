@@ -43,8 +43,13 @@
             # Filter out only current systems (assumes use of github:nix-systems)
             def main [
               flake: string = "."  # The flake to build
+              --json # Whether to return json
               ] {
-              flake-outputs $flake | str join "\n"
+              if $json {
+                flake-outputs $flake | to json
+              } else {
+                flake-outputs $flake | str join "\n"
+              }
             }
           '';
         };
