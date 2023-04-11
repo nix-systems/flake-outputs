@@ -5,7 +5,7 @@ Get buildable outputs of a flake, for projects that use [nix-systems](https://gi
 
 ```sh
 # Get all buildable flake outputs
-OUTS=$(nix run github:srid/flake-outputs github:srid/haskell-template)
+OUTS=$(nix run github:nix-systems/flake-outputs github:srid/haskell-template)
 
 for OUT in $OUTS
 do
