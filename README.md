@@ -10,9 +10,9 @@ OUTS=$(nix run github:nix-systems/flake-outputs github:srid/haskell-template)
 for OUT in $OUTS
 do
   # Build them
-  nix build .#"$OUT"
+  nix build --no-link .#"$OUT"
   # Push to cachix
-  nix build .#"$OUT" | cachix push mycache
+  nix build --no-link .#"$OUT" | cachix push mycache
 done
 ```
 
