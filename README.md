@@ -12,7 +12,7 @@ do
   # Build them
   nix build --no-link .#"$OUT"
   # Push to cachix
-  nix build --no-link .#"$OUT" | cachix push mycache
+  nix build --no-link --print-out-paths .#"$OUT" | cachix push mycache
 done
 ```
 
