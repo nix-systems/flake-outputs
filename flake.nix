@@ -22,7 +22,10 @@
               # TODO: Error out on 
               # warning: the flag '--override-input systems github:nix-systems/aarch64-darwin' does not match any input
               let metadata = (
-                    nix flake show --json --allow-import-from-derivation
+                    nix flake show 
+                      --json 
+                      --allow-import-from-derivation
+                      --no-update-lock-file
                       --override-input systems $systemInput $flake | from json
                   )
               let packages = ($metadata | get packages | get $system | columns)
