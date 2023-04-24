@@ -21,3 +21,7 @@ done
 This is useful in CI[^eg] to automate building of all outputs, regardless of IFD or use of multi-systems.
 
 [^eg]: Jenkins, for example: https://github.com/juspay/jenkins-nix-ci/issues/12
+
+## Alternatives
+
+- https://github.com/srid/devour-flake
